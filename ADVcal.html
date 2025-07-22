@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADV-Cal Pipe System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9; /* slate-100 */
+        }
+        .chart-container {
+            position: relative;
+            height: 450px;
+            width: 100%;
+        }
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #475569; /* slate-600 */
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e1; /* slate-300 */
+            border-radius: 0.5rem;
+            background-color: #f8fafc; /* slate-50 */
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #3b82f6; /* blue-500 */
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+        }
+        .result-card {
+            background-color: #ffffff;
+            border-left: 5px solid #2563eb; /* blue-600 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .result-card h3 {
+            font-size: 1rem;
+            color: #475569; /* slate-600 */
+            margin-bottom: 0.5rem;
+        }
+        .result-card p {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b; /* slate-800 */
+        }
+        .tab-button {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            color: #475569; /* slate-600 */
+            transition: all 0.2s;
+        }
+        .tab-button.active {
+            color: #1d4ed8; /* blue-700 */
+            border-bottom-color: #1d4ed8; /* blue-700 */
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .manual-content h4 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1e293b; /* slate-800 */
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .manual-content h5 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #334155; /* slate-700 */
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .manual-content p, .manual-content li {
+            color: #475569; /* slate-600 */
+            line-height: 1.6;
+        }
+        .manual-content ul {
+            list-style-position: inside;
+            padding-left: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-slate-100">
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-800">ADV-Cal Pipe System</h1>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+                <div class="border-b border-slate-200 mb-6">
+                    <nav class="-mb-px flex space-x-2 sm:space-x-4 overflow-x-auto" aria-label="Tabs">
+                        <button class="tab-button active" data-tab="tab1">Utama</button>
+                        <button class="tab-button" data-tab="tab2">Paip</button>
+                        <button class="tab-button" data-tab="tab3">Pam</button>
+                        <button class="tab-button" data-tab="tab4">Info</button>
+                    </nav>
+                </div>
+
+                <div id="tab1" class="tab-content active">
+                    <h2 class="text-xl font-bold mb-4 text-slate-700">Parameter Utama</h2>
+                    <div class="input-group">
+                        <label for="flowRate">Kadar Alir Operasi (m³/jam)</label>
+                        <input type="number" id="flowRate" value="250">
+                    </div>
+                    <div class="input-group">
+                        <label for="temp">Suhu Cecair (°C)</label>
+                        <input type="number" id="temp" value="60">
+                    </div>
+                    <div class="input-group">
+                        <label for="staticHead">Turus Statik (Angkat Menegak) (m)</label>
+                        <input type="number" id="staticHead" value="2.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="npshStatic">Paras Air Atas Sedutan (m)</label>
+                        <input type="number" id="npshStatic" value="0.6">
+                    </div>
+                </div>
+
+                <div id="tab2" class="tab-content">
+                    <h2 class="text-xl font-bold mb-4 text-slate-700">Konfigurasi Paip & Komponen</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="input-group">
+                            <label for="pipeLength">Jumlah Panjang Paip (m)</label>
+                            <input type="number" id="pipeLength" value="162">
+                        </div>
+                        <div class="input-group">
+                            <label for="pipeDiameter">Diameter Paip (mm)</label>
+                            <select id="pipeDiameter">
+                                <option value="250">250</option>
+                                <option value="300">300</option>
+                                <option value="350">350</option>
+                                <option value="400">400</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="bends90">Sebelah 90°</label>
+                            <input type="number" id="bends90" value="2">
+                        </div>
+                        <div class="input-group">
+                            <label for="butterflyValves">Injap Rama-rama</label>
+                            <input type="number" id="butterflyValves" value="2">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab3" class="tab-content">
+                    <h2 class="text-xl font-bold mb-4 text-slate-700">Data Pam & Cecair</h2>
+                    <div class="input-group">
+                        <label for="pumpModel">Model Pam</label>
+                        <select id="pumpModel">
+                            <option value="150-125CPX400">150-125CPX400</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="pumpRpm">Kelajuan Pam (RPM)</label>
+                        <select id="pumpRpm">
+                            <option value="1420">1420</option>
+                            <option value="284">284</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="pumpEfficiency">Kecekapan Pam (%)</label>
+                        <input type="number" id="pumpEfficiency" value="50">
+                    </div>
+                    <div class="input-group">
+                        <label for="sg">Graviti Spesifik (SG)</label>
+                        <input type="number" id="sg" value="1.01">
+                    </div>
+                </div>
+                
+                <div id="tab4" class="tab-content">
+                    <div class="manual-content max-h-[60vh] overflow-y-auto pr-2">
+                        <h2 class="text-xl font-bold mb-4 text-slate-700">Manual Pengguna: ADV-Cal Pipe System</h2>
+                        
+                        <h4>1. Pengenalan</h4>
+                        <p>Selamat datang ke manual pengguna untuk ADV-Cal Pipe System. Alat ini adalah kalkulator interaktif yang direka untuk membantu anda memahami, menganalisis, dan memvisualisasikan dinamik sistem paip dan pam.</p>
+                        
+                        <h4>2. Susun Atur Kalkulator</h4>
+                        <p>Antara muka ADV-Cal terbahagi kepada dua bahagian utama:</p>
+                        <ul>
+                            <li><strong>Panel Input (Kiri):</strong> Di sinilah anda memasukkan semua data dan parameter untuk sistem anda. Ia disusun menggunakan sistem tab untuk memastikan semua input teratur.</li>
+                            <li><strong>Panel Keputusan & Analisis (Kanan):</strong> Bahagian ini memaparkan hasil pengiraan anda dalam bentuk kad ringkasan dan graf visual yang dinamik.</li>
+                        </ul>
+
+                        <h4>3. Panduan Input Langkah demi Langkah</h4>
+                        
+                        <h5>Tab 1: Utama</h5>
+                        <p>Ini adalah tab untuk parameter operasi yang paling asas.</p>
+                        <ul>
+                            <li><strong>Kadar Alir Operasi (m³/jam):</strong> Kadar aliran di mana anda ingin melihat keputusan ringkasan.</li>
+                            <li><strong>Suhu Cecair (°C):</strong> Mempengaruhi kelikatan dan tekanan wap cecair secara automatik.</li>
+                            <li><strong>Turus Statik (m):</strong> Jumlah ketinggian menegak yang perlu diatasi oleh pam.</li>
+                            <li><strong>Paras Air Atas Sedutan (m):</strong> Ketinggian paras air di tangki sumber. Masukkan nilai negatif jika di bawah pam.</li>
+                        </ul>
+
+                        <h5>Tab 2: Paip</h5>
+                        <p>Tab ini adalah untuk mentakrifkan konfigurasi fizikal sistem paip anda.</p>
+                        <ul>
+                            <li><strong>Jumlah Panjang Paip (m):</strong> Jumlah panjang semua paip lurus dalam sistem.</li>
+                            <li><strong>Diameter Paip (mm):</strong> Pilih saiz diameter dalaman paip.</li>
+                            <li><strong>Sebelah 90° & Injap Rama-rama:</strong> Masukkan jumlah bilangan komponen.</li>
+                        </ul>
+
+                        <h5>Tab 3: Pam</h5>
+                        <p>Tab ini adalah untuk mentakrifkan pam dan sifat cecair.</p>
+                        <ul>
+                            <li><strong>Model & Kelajuan Pam (RPM):</strong> Memuatkan lengkung prestasi yang sepadan secara automatik.</li>
+                            <li><strong>Kecekapan Pam (%):</strong> Digunakan untuk mengira kuasa yang diperlukan.</li>
+                            <li><strong>Graviti Spesifik (SG):</strong> Ketumpatan cecair berbanding air (1.0 untuk air bersih).</li>
+                        </ul>
+
+                        <h4>4. Memahami Keputusan Anda</h4>
+                        <p>Selepas menekan butang "Kira Semula", panel di sebelah kanan akan dikemas kini.</p>
+                        <h5>Kad Keputusan</h5>
+                        <p>Tiga kad di bahagian atas memberikan ringkasan prestasi pada Kadar Alir Operasi yang anda tetapkan.</p>
+                        <h5>Graf Analisis Visual</h5>
+                        <p>Graf utama menunjukkan empat lengkung penting: Lengkung Sistem (biru), Lengkung Pam (hitam), NPSHa (hijau), dan NPSHr (merah).</p>
+                        <ul>
+                            <li><strong>Titik Operasi:</strong> Titik di mana lengkung biru dan hitam bersilang.</li>
+                            <li><strong>Pemeriksaan Keselamatan:</strong> Pastikan lengkung hijau sentiasa berada jauh di atas lengkung merah.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <button id="calculateBtn" class="w-full bg-blue-700 text-white font-bold py-3 px-4 rounded-lg mt-8 hover:bg-blue-800 transition-colors">Kira Semula & Lukis Graf</button>
+            </div>
+
+            <div class="lg:col-span-3 bg-white p-6 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-bold mb-6 border-b border-slate-200 pb-3 text-slate-700">Keputusan & Analisis Visual</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="result-card">
+                        <h3>Jumlah Turus Sistem</h3>
+                        <p id="totalHeadResult">-- m</p>
+                    </div>
+                    <div class="result-card">
+                        <h3>NPSH Tersedia</h3>
+                        <p id="npshResult">-- m</p>
+                    </div>
+                    <div class="result-card">
+                        <h3>Kuasa Diperlukan</h3>
+                        <p id="powerResult">-- kW</p>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="mainChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const K_VALUES = {
+            '90o bend': { 250: 0.56, 300: 0.51, 350: 0.49, 400: 0.45 },
+            'Butterfly': { 250: 0.56, 300: 0.51, 350: 0.49, 400: 0.45 }
+        };
+        const VISCOSITY = [
+            { temp: 10, value: 1.300E-06 }, { temp: 20, value: 1.004E-06 }, { temp: 30, value: 8.005E-07 },
+            { temp: 40, value: 6.561E-07 }, { temp: 50, value: 5.505E-07 }, { temp: 60, value: 4.709E-07 },
+            { temp: 70, value: 4.035E-07 }, { temp: 80, value: 3.540E-07 }, { temp: 90, value: 3.145E-07 },
+            { temp: 100, value: 2.822E-07 }
+        ];
+        const VAPOUR_PRESSURE = [
+            { temp: 10, value: 1.2281 }, { temp: 20, value: 2.3388 }, { temp: 30, value: 4.2455 },
+            { temp: 40, value: 7.3814 }, { temp: 50, value: 12.344 }, { temp: 60, value: 19.932 },
+            { temp: 70, value: 31.176 }, { temp: 80, value: 47.373 }, { temp: 90, value: 70.117 },
+            { temp: 100, value: 101.325 }
+        ];
+        const PUMP_DATA = {
+            '150-125CPX400': {
+                '1420': {
+                    flow: [0, 50, 100, 150, 200, 250, 300, 350, 400, 450],
+                    head: [68, 68, 66, 65, 64, 63, 59, 53, 45, 38],
+                    npshr: [1.5, 1.8, 2.2, 2.8, 3.5, 4.0, 4.5, 5.0, 5.5]
+                },
+                '284': {
+                    flow: [0, 10, 20, 30, 40, 50, 60, 70],
+                    head: [2.7, 2.7, 2.6, 2.6, 2.6, 2.5, 2.4, 2.1],
+                    npshr: [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2]
+                }
+            }
+        };
+
+        let mainChart;
+
+        function getValueFromTable(table, temp) {
+            let lower = null, upper = null;
+            for(const point of table) {
+                if(point.temp <= temp) lower = point;
+                if(point.temp >= temp && !upper) upper = point;
+            }
+            if (!lower) return table[0].value;
+            if (!upper) return table[table.length - 1].value;
+            if (lower.temp === upper.temp) return lower.value;
+            const ratio = (temp - lower.temp) / (upper.temp - lower.temp);
+            return lower.value + ratio * (upper.value - lower.value);
+        }
+
+        function calculate() {
+            const flowRateOp = parseFloat(document.getElementById('flowRate').value);
+            const temp = parseFloat(document.getElementById('temp').value);
+            const staticHead = parseFloat(document.getElementById('staticHead').value);
+            const npshStatic = parseFloat(document.getElementById('npshStatic').value);
+            const pumpEfficiency = parseFloat(document.getElementById('pumpEfficiency').value) / 100;
+            const sg = parseFloat(document.getElementById('sg').value);
+            
+            const pipeLength = parseFloat(document.getElementById('pipeLength').value);
+            const pipeDiameterMM = document.getElementById('pipeDiameter').value;
+            const pipeDiameter = parseFloat(pipeDiameterMM) / 1000;
+            const bends90 = parseInt(document.getElementById('bends90').value);
+            const butterflyValves = parseInt(document.getElementById('butterflyValves').value);
+
+            const pumpModel = document.getElementById('pumpModel').value;
+            const pumpRpm = document.getElementById('pumpRpm').value;
+            const selectedPump = PUMP_DATA[pumpModel][pumpRpm];
+
+            const viscosity = getValueFromTable(VISCOSITY, temp);
+            const vapourPressureKpa = getValueFromTable(VAPOUR_PRESSURE, temp);
+            const hvap = vapourPressureKpa / (9.81 * (sg * 1000) / 1000);
+
+            const flowRates = selectedPump.flow;
+            const systemHeadData = [];
+            const npshaData = [];
+            
+            const pipeArea = Math.PI * Math.pow(pipeDiameter / 2, 2);
+            const kFactor90 = K_VALUES['90o bend'][pipeDiameterMM] || 0.5;
+            const kFactorButterfly = K_VALUES['Butterfly'][pipeDiameterMM] || 0.5;
+            const totalK = (bends90 * kFactor90) + (butterflyValves * kFactorButterfly);
+
+            let operatingHead = 0;
+
+            flowRates.forEach(q_m3h => {
+                const q_m3s = q_m3h / 3600;
+                const velocity = q_m3s / pipeArea;
+                
+                const reynolds = (velocity * pipeDiameter) / viscosity;
+                const frictionFactor = (reynolds > 4000) ? 0.02 : (reynolds > 0 ? 64 / reynolds : 0);
+                
+                const hf_pipe = frictionFactor * (pipeLength / pipeDiameter) * (Math.pow(velocity, 2) / (2 * 9.81));
+                const hf_fittings = totalK * (Math.pow(velocity, 2) / (2 * 9.81));
+                
+                const totalDynamicHead = hf_pipe + hf_fittings;
+                const totalHead = staticHead + totalDynamicHead;
+                systemHeadData.push(totalHead);
+
+                const npsha = 10.33 + npshStatic - hvap - totalDynamicHead;
+                npshaData.push(npsha);
+
+                if (q_m3h === flowRateOp) {
+                    operatingHead = totalHead;
+                }
+            });
+            
+            if (operatingHead === 0 && flowRateOp > 0) {
+                 const q_m3s_op = flowRateOp / 3600;
+                 const velocity_op = q_m3s_op / pipeArea;
+                 const reynolds_op = (velocity_op * pipeDiameter) / viscosity;
+                 const frictionFactor_op = (reynolds_op > 4000) ? 0.02 : (reynolds_op > 0 ? 64 / reynolds_op : 0);
+                 const hf_pipe_op = frictionFactor_op * (pipeLength / pipeDiameter) * (Math.pow(velocity_op, 2) / (2 * 9.81));
+                 const hf_fittings_op = totalK * (Math.pow(velocity_op, 2) / (2 * 9.81));
+                 operatingHead = staticHead + hf_pipe_op + hf_fittings_op;
+            }
+
+
+            const powerKw = (flowRateOp / 3600 * operatingHead * sg * 9.81) / pumpEfficiency;
+
+            document.getElementById('totalHeadResult').textContent = `${operatingHead.toFixed(1)} m`;
+            const operatingNPSHa = 10.33 + npshStatic - hvap - (operatingHead - staticHead);
+            document.getElementById('npshResult').textContent = `${operatingNPSHa.toFixed(1)} m`;
+            document.getElementById('powerResult').textContent = `${powerKw.toFixed(1)} kW`;
+
+            updateChart(flowRates, systemHeadData, npshaData, selectedPump);
+        }
+
+        function updateChart(flowRates, systemHeadData, npshaData, selectedPump) {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            if (mainChart) {
+                mainChart.destroy();
+            }
+            mainChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: flowRates,
+                    datasets: [
+                        {
+                            label: 'Lengkung Sistem (Keperluan)',
+                            data: systemHeadData.map(d => d.toFixed(2)),
+                            borderColor: '#2563eb', // blue-600
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            yAxisID: 'y',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Lengkung Pam (Kemampuan)',
+                            data: selectedPump.head,
+                            borderColor: '#1e293b', // slate-800
+                            yAxisID: 'y',
+                            tension: 0.3,
+                            borderDash: [5, 5]
+                        },
+                        {
+                            label: 'NPSH Tersedia (NPSHa)',
+                            data: npshaData.map(d => d.toFixed(2)),
+                            borderColor: '#16a34a', // green-600
+                            backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                            yAxisID: 'y1',
+                            tension: 0.3,
+                            fill: true
+                        },
+                         {
+                            label: 'NPSH Diperlukan (NPSHr)',
+                            data: selectedPump.npshr,
+                            borderColor: '#dc2626', // red-600
+                            yAxisID: 'y1',
+                            tension: 0.3,
+                            borderDash: [5, 5]
+                        }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Kadar Alir (m³/jam)', color: '#334155' },
+                            ticks: { color: '#475569' }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Jumlah Turus (meter)',
+                                color: '#334155'
+                            },
+                            beginAtZero: true,
+                            ticks: { color: '#475569' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                             title: {
+                                display: true,
+                                text: 'Turus NPSH (meter)',
+                                color: '#334155'
+                            },
+                            grid: {
+                                drawOnChartArea: false, 
+                            },
+                            beginAtZero: true,
+                            ticks: { color: '#475569' }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Analisis Prestasi Sistem Pam',
+                            font: { size: 16 },
+                            color: '#1e293b'
+                        },
+                        legend: {
+                            labels: {
+                                color: '#334155'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    return `Pada Kadar Alir: ${label} m³/j`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        const tabs = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const calculateBtn = document.getElementById('calculateBtn');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(item => item.classList.remove('active'));
+                tab.classList.add('active');
+
+                const target = tab.getAttribute('data-tab');
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === target) {
+                        content.classList.add('active');
+                    }
+                });
+
+                if (target === 'tab4') {
+                    calculateBtn.style.display = 'none';
+                } else {
+                    calculateBtn.style.display = 'block';
+                }
+            });
+        });
+
+        calculateBtn.addEventListener('click', calculate);
+        window.onload = calculate;
+
+    </script>
+</body>
+</html>

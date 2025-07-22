@@ -390,3 +390,81 @@
             }
             mainChart = new Chart(ctx, {
                 type: 'line',
+                data: {
+                    labels: flow,
+                    datasets: [{
+                        label: 'System Curve (m)',
+                        data: systemHead,
+                        borderColor: '#3b82f6',
+                        fill: false,
+                        tension: 0.1
+                    }, {
+                        label: 'Pump Curve (m)',
+                        data: pumpHead,
+                        borderColor: '#1e293b',
+                        fill: false,
+                        tension: 0.1
+                    }, {
+                        label: 'NPSHa (m)',
+                        data: npsha,
+                        borderColor: '#16a34a',
+                        fill: false,
+                        tension: 0.1
+                    }, {
+                        label: 'NPSHr (m)',
+                        data: npshr,
+                        borderColor: '#dc2626',
+                        borderDash: [5, 5],
+                        fill: false,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'Flow Rate (m³/h)' } },
+                        y: { title: { display: true, text: 'Head (m)' }, beginAtZero: true }
+                    },
+                    plugins: {
+                        title: { display: true, text: 'System Performance Analysis Graph', font: { size: 16 } },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    interaction: { mode: 'index', intersect: false }
+                }
+            });
+        }
+
+        // This listener ensures that the HTML is fully loaded before the script tries to find buttons.
+        // This is the key to preventing "button not working" errors.
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- TAB BUTTONS FUNCTIONALITY ---
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    const tabId = button.getAttribute('data-tab');
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === tabId) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            // --- RECALCULATE BUTTON FUNCTIONALITY ---
+            document.getElementById('calculateBtn').addEventListener('click', calculate);
+            
+            // --- INITIAL CALCULATION ON PAGE LOAD ---
+            calculate();
+        });
+    </script>
+
+</body>
+</html>

@@ -3,466 +3,299 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADV-Cal Pipe System</title>
+    <title>Kubeez Calc</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Courier+Prime:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9; /* slate-100 */
+            font-family: 'Inter', sans-serif; /* Normal, professional font for the calculator */
+            background-color: #111827; /* Dark background */
+            color: #d1d5db; /* Gray text */
         }
-        .chart-container {
-            position: relative;
-            height: 450px;
-            width: 100%;
+        .page-title {
+            font-family: 'Caveat', cursive; /* Specific font for the main title */
+            text-align: center;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-top: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .page-subtitle {
+            font-family: 'Courier Prime', monospace; /* Typewriter font for the subtitle */
+            text-align: center;
+            font-size: 1rem;
+            color: #9ca3af; /* gray-400 */
+            margin-bottom: 1.5rem;
+        }
+        .main-container {
+            background-color: #1f2937; /* Darker card */
+            border-radius: 1rem;
+            border: 1px solid #374151;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 1rem auto 3rem auto;
+            overflow: hidden;
+        }
+        .calculator-content {
+             padding: 2.5rem;
         }
         .input-group {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
         .input-group label {
             display: block;
             margin-bottom: 0.5rem;
-            color: #475569; /* slate-600 */
+            color: #9ca3af;
             font-weight: 600;
-            font-size: 0.875rem;
         }
-        .input-group input, .input-group select {
+        .input-group input {
             width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #cbd5e1; /* slate-300 */
+            padding: 0.75rem 1rem;
+            border: 1px solid #4b5563;
             border-radius: 0.5rem;
-            background-color: #f8fafc; /* slate-50 */
+            font-size: 1rem;
+            background-color: #374151;
+            color: #e5e7eb;
+            font-family: 'Inter', sans-serif; /* Ensure inputs use the normal font */
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .input-group input:focus, .input-group select:focus {
+        .input-group input:focus {
             outline: none;
-            border-color: #3b82f6; /* blue-500 */
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
         }
-        .result-card {
-            background-color: #ffffff;
-            border-left: 5px solid #2563eb; /* blue-600 */
+        .calculate-button {
+            width: 100%;
+            background-color: #2563eb;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1.125rem;
             padding: 1rem;
             border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .calculate-button:hover {
+            background-color: #1d4ed8;
+        }
+        .result-area {
+            margin-top: 2rem;
+            background-color: #111827;
+            border: 1px solid #3b82f6;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
             text-align: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
-        .result-card h3 {
-            font-size: 1rem;
-            color: #475569; /* slate-600 */
-            margin-bottom: 0.5rem;
+        .result-area h3 {
+            font-size: 1.25rem;
+            color: #93c5fd;
+            font-weight: 600;
         }
-        .result-card p {
-            font-size: 2rem;
+        .result-area p {
+            font-size: 2.5rem;
             font-weight: 700;
-            color: #1e293b; /* slate-800 */
+            color: #ffffff;
+            margin-top: 0.5rem;
+        }
+        .tab-nav {
+            display: flex;
+            background-color: #374151;
         }
         .tab-button {
-            padding: 0.75rem 1rem;
+            flex-grow: 1;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 700;
+            color: #9ca3af;
             cursor: pointer;
             border-bottom: 3px solid transparent;
-            font-weight: 600;
-            color: #475569; /* slate-600 */
             transition: all 0.2s;
         }
         .tab-button.active {
-            color: #1d4ed8; /* blue-700 */
-            border-bottom-color: #1d4ed8; /* blue-700 */
+            color: #ffffff;
+            background-color: #1f2937;
+            border-bottom-color: #2563eb;
         }
-        .tab-content {
+        .calculator-body {
             display: none;
         }
-        .tab-content.active {
+        .calculator-body.active {
             display: block;
         }
-        .manual-content h4 {
-            font-size: 1.125rem;
-            font-weight: 700;
-            color: #1e293b; /* slate-800 */
-            margin-top: 1.5rem;
-            margin-bottom: 0.75rem;
-        }
-        .manual-content h5 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #334155; /* slate-700 */
-            margin-top: 1.25rem;
-            margin-bottom: 0.5rem;
-        }
-        .manual-content p, .manual-content li {
-            color: #475569; /* slate-600 */
-            line-height: 1.6;
-        }
-        .manual-content ul {
-            list-style-position: inside;
-            padding-left: 0.5rem;
+        .footer {
+            text-align: center;
+            padding-bottom: 2rem;
+            color: #4b5563; /* gray-600 */
+            font-size: 0.875rem;
         }
     </style>
 </head>
-<body class="bg-slate-100">
+<body>
 
-    <div class="container mx-auto p-4 sm:p-6 md:p-8">
-        <header class="text-center mb-10">
-            <h1 class="text-3xl md:text-4xl font-bold text-slate-800">ADV-Cal Pipe System</h1>
-        </header>
+    <h1 class="page-title">Kubeez Calc</h1>
+    <p class="page-subtitle">"from Papa to Mami🍬"</p>
 
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-            
-            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
-                <div class="border-b border-slate-200 mb-6">
-                    <nav class="-mb-px flex space-x-2 sm:space-x-4 overflow-x-auto" aria-label="Tabs">
-                        <button class="tab-button active" data-tab="tab1">Main</button>
-                        <button class="tab-button" data-tab="tab2">Pipe</button>
-                        <button class="tab-button" data-tab="tab3">Pump</button>
-                        <button class="tab-button" data-tab="tab4">Info</button>
-                    </nav>
+    <div class="main-container">
+        <div class="tab-nav">
+            <button class="tab-button active" data-tab="pump-kw">Pump KW</button>
+            <button class="tab-button" data-tab="pipe-size">Pipe Size</button>
+        </div>
+
+        <!-- Pump KW Calculator -->
+        <div id="pump-kw" class="calculator-body active">
+            <div class="calculator-content">
+                <header class="text-center mb-8">
+                    <h2 class="text-2xl font-bold text-white">Pump KW</h2>
+                    <p class="text-gray-400 mt-1">Based on the formula: (ρ * g * Q * H) / (1000 * ηp)</p>
+                </header>
+                <div class="input-group">
+                    <label for="density">ρ = Fluid Density (kg/m³)</label>
+                    <input type="number" id="density" value="1000">
                 </div>
-
-                <div id="tab1" class="tab-content active">
-                    <h2 class="text-xl font-bold mb-4 text-slate-700">Main Parameters</h2>
-                    <div class="input-group">
-                        <label for="flowRate">Operating Flow Rate (m³/h)</label>
-                        <input type="number" id="flowRate" value="250">
-                    </div>
-                    <div class="input-group">
-                        <label for="temp">Fluid Temperature (°C)</label>
-                        <input type="number" id="temp" value="60">
-                    </div>
-                    <div class="input-group">
-                        <label for="staticHead">Static Head (Vertical Lift) (m)</label>
-                        <input type="number" id="staticHead" value="2.0">
-                    </div>
-                    <div class="input-group">
-                        <label for="npshStatic">Suction Water Level (m)</label>
-                        <input type="number" id="npshStatic" value="0.6">
-                    </div>
+                <div class="input-group">
+                    <label for="flowRateKW">Q = Flow Rate (m³/hr)</label>
+                    <input type="number" id="flowRateKW" value="150">
                 </div>
-
-                <div id="tab2" class="tab-content">
-                    <h2 class="text-xl font-bold mb-4 text-slate-700">Pipe & Component Configuration</h2>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="input-group">
-                            <label for="pipeLength">Total Pipe Length (m)</label>
-                            <input type="number" id="pipeLength" value="162">
-                        </div>
-                        <div class="input-group">
-                            <label for="pipeDiameter">Pipe Diameter (mm)</label>
-                            <select id="pipeDiameter">
-                                <option value="250">250</option>
-                                <option value="300">300</option>
-                                <option value="350">350</option>
-                                <option value="400">400</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label for="bends90">90° Bends</label>
-                            <input type="number" id="bends90" value="2">
-                        </div>
-                        <div class="input-group">
-                            <label for="butterflyValves">Butterfly Valves</label>
-                            <input type="number" id="butterflyValves" value="2">
-                        </div>
-                    </div>
+                <div class="input-group">
+                    <label for="totalHead">H = Total Dynamic Head (m)</label>
+                    <input type="number" id="totalHead" value="25">
                 </div>
-
-                <div id="tab3" class="tab-content">
-                    <h2 class="text-xl font-bold mb-4 text-slate-700">Pump & Fluid Data</h2>
-                    <div class="input-group">
-                        <label for="pumpModel">Pump Model</label>
-                        <select id="pumpModel">
-                            <option value="150-125CPX400">150-125CPX400</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label for="pumpRpm">Pump Speed (RPM)</label>
-                        <select id="pumpRpm">
-                            <option value="1420">1420</option>
-                            <option value="284">284</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label for="pumpEfficiency">Pump Efficiency (%)</label>
-                        <input type="number" id="pumpEfficiency" value="50">
-                    </div>
-                    <div class="input-group">
-                        <label for="sg">Specific Gravity (SG)</label>
-                        <input type="number" id="sg" value="1.01">
-                    </div>
+                <div class="input-group">
+                    <label for="pumpEfficiency">ηp = Pump Efficiency (%)</label>
+                    <input type="number" id="pumpEfficiency" value="75">
                 </div>
-                
-                <div id="tab4" class="tab-content">
-                    <div class="manual-content max-h-[60vh] overflow-y-auto pr-2">
-                        <h2 class="text-xl font-bold mb-4 text-slate-700">User Manual: ADV-Cal Pipe System</h2>
-                        
-                        <h4>1. Introduction</h4>
-                        <p>Welcome to the user manual for the ADV-Cal Pipe System. This tool is an interactive calculator designed to help you understand, analyze, and visualize the dynamics of a pipe and pump system.</p>
-                        
-                        <h4>2. Calculator Layout</h4>
-                        <p>The ADV-Cal interface is divided into two main sections:</p>
-                        <ul>
-                            <li><strong>Input Panel (Left):</strong> This is where you enter all the data and parameters for your system. It's organized using a tab system to keep everything tidy.</li>
-                            <li><strong>Results & Analysis Panel (Right):</strong> This section displays your calculation results in the form of summary cards and a dynamic visual graph.</li>
-                        </ul>
-
-                        <h4>3. Step-by-Step Input Guide</h4>
-                        
-                        <h5>Tab 1: Main</h5>
-                        <p>This is the tab for the most basic operating parameters.</p>
-                        <ul>
-                            <li><strong>Operating Flow Rate (m³/h):</strong> The flow rate at which you want to see the summary results.</li>
-                            <li><strong>Fluid Temperature (°C):</strong> Automatically affects the fluid's viscosity and vapor pressure.</li>
-                            <li><strong>Static Head (m):</strong> The total vertical height the pump needs to overcome.</li>
-                            <li><strong>Suction Water Level (m):</strong> The height of the water level in the source tank. Enter a negative value if it's below the pump.</li>
-                        </ul>
-
-                        <h5>Tab 2: Pipe</h5>
-                        <p>This tab is for defining the physical configuration of your pipe system.</p>
-                        <ul>
-                            <li><strong>Total Pipe Length (m):</strong> The total length of all straight pipes in the system.</li>
-                            <li><strong>Pipe Diameter (mm):</strong> Select the internal pipe diameter size.</li>
-                            <li><strong>90° Bends & Butterfly Valves:</strong> Enter the total number of each component.</li>
-                        </ul>
-
-                        <h5>Tab 3: Pump</h5>
-                        <p>This tab is for defining the pump and fluid properties.</p>
-                        <ul>
-                            <li><strong>Pump Model & Speed (RPM):</strong> Automatically loads the corresponding performance curve.</li>
-                            <li><strong>Pump Efficiency (%):</strong> Used to calculate the required power.</li>
-                            <li><strong>Specific Gravity (SG):</strong> The density of the fluid relative to water (1.0 for clean water).</li>
-                        </ul>
-
-                        <h4>4. Understanding Your Results</h4>
-                        <p>After pressing the "Recalculate" button, the panel on the right will update.</p>
-                        <h5>Result Cards</h5>
-                        <p>The three cards at the top provide a performance summary at the Operating Flow Rate you set.</p>
-                        <h5>Visual Analysis Graph</h5>
-                        <p>The main graph shows four important curves: System Curve (blue), Pump Curve (black), NPSHa (green), and NPSHr (red).</p>
-                        <ul>
-                            <li><strong>Operating Point:</strong> The point where the blue and black curves intersect. This is the natural balancing point of the system.</li>
-                            <li><strong>Safety Check:</strong> Ensure the green NPSHa curve always stays well above the red NPSHr curve to avoid cavitation.</li>
-                        </ul>
-                    </div>
+                <button id="calculateKWBtn" class="calculate-button">Calculate Pump kW</button>
+                <div id="resultKW" class="result-area" style="display: none;">
+                    <h3>Pump Power</h3>
+                    <p id="powerResult">-- kW</p>
                 </div>
-
-                <button id="calculateBtn" class="w-full bg-blue-700 text-white font-bold py-3 px-4 rounded-lg mt-8 hover:bg-blue-800 transition-colors">Recalculate & Draw Graph</button>
             </div>
+        </div>
 
-            <div class="lg:col-span-3 bg-white p-6 rounded-xl shadow-lg">
-                <h2 class="text-2xl font-bold mb-6 border-b border-slate-200 pb-3 text-slate-700">Results & Visual Analysis</h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="result-card">
-                        <h3>Total System Head</h3>
-                        <p id="totalHeadResult">-- m</p>
-                    </div>
-                    <div class="result-card">
-                        <h3>Available NPSH</h3>
-                        <p id="npshResult">-- m</p>
-                    </div>
-                    <div class="result-card">
-                        <h3>Power Required</h3>
-                        <p id="powerResult">-- kW</p>
-                    </div>
+        <!-- Pipe Sizing Calculator -->
+        <div id="pipe-size" class="calculator-body">
+            <div class="calculator-content">
+                <header class="text-center mb-8">
+                    <h2 class="text-2xl font-bold text-white">Pipe Size</h2>
+                    <p class="text-gray-400 mt-1">Calculates diameter based on flow and velocity.</p>
+                </header>
+                <div class="input-group">
+                    <label for="flowRatePipe">Flow Rate (m³/hr)</label>
+                    <input type="number" id="flowRatePipe" value="150">
                 </div>
-
-                <div class="chart-container">
-                    <canvas id="mainChart"></canvas>
+                <div class="input-group">
+                    <label for="velocity">Target Fluid Velocity (m/s)</label>
+                    <input type="number" id="velocity" value="2">
+                </div>
+                <button id="calculatePipeBtn" class="calculate-button">Calculate Pipe Diameter</button>
+                <div id="resultPipe" class="result-area" style="display: none;">
+                    <h3>Required Internal Diameter</h3>
+                    <div class="flex justify-around items-start mt-4">
+                        <div class="text-center">
+                            <p id="diameterResultMM" class="text-4xl">--</p>
+                            <span class="text-sm text-gray-400">mm</span>
+                        </div>
+                        <div class="text-center">
+                            <p id="diameterResultInches" class="text-4xl">--</p>
+                            <span class="text-sm text-gray-400">inches</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <footer class="footer">
+        <p>Created by SamiL©️ 2025</p>
+    </footer>
+
     <script>
-        const K_VALUES = {
-            '90o bend': { 250: 0.56, 300: 0.51, 350: 0.49, 400: 0.45 },
-            'Butterfly': { 250: 0.56, 300: 0.51, 350: 0.49, 400: 0.45 }
-        };
-        const VISCOSITY = [
-            { temp: 10, value: 1.300E-06 }, { temp: 20, value: 1.004E-06 }, { temp: 30, value: 8.005E-07 },
-            { temp: 40, value: 6.561E-07 }, { temp: 50, value: 5.505E-07 }, { temp: 60, value: 4.709E-07 },
-            { temp: 70, value: 4.035E-07 }, { temp: 80, value: 3.540E-07 }, { temp: 90, value: 3.145E-07 },
-            { temp: 100, value: 2.822E-07 }
-        ];
-        const VAPOUR_PRESSURE = [
-            { temp: 10, value: 1.2281 }, { temp: 20, value: 2.3388 }, { temp: 30, value: 4.2455 },
-            { temp: 40, value: 7.3814 }, { temp: 50, value: 12.344 }, { temp: 60, value: 19.932 },
-            { temp: 70, value: 31.176 }, { temp: 80, value: 47.373 }, { temp: 90, value: 70.117 },
-            { temp: 100, value: 101.325 }
-        ];
-        const PUMP_DATA = {
-            '150-125CPX400': {
-                '1420': {
-                    flow: [0, 50, 100, 150, 200, 250, 300, 350, 400, 450],
-                    head: [68, 68, 66, 65, 64, 63, 59, 53, 45, 38],
-                    npshr: [1.5, 1.8, 2.2, 2.8, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
-                },
-                '284': {
-                    flow: [0, 10, 20, 30, 40, 50, 60, 70, 80],
-                    head: [2.7, 2.7, 2.6, 2.6, 2.6, 2.5, 2.4, 2.1, 1.8],
-                    npshr: [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3]
-                }
-            }
-        };
+        // Tab functionality
+        const tabs = document.querySelectorAll('.tab-button');
+        const calculators = document.querySelectorAll('.calculator-body');
 
-        let mainChart;
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(item => item.classList.remove('active'));
+                tab.classList.add('active');
 
-        function getValueFromTable(table, temp) {
-            let lower = null, upper = null;
-            for (const point of table) {
-                if (point.temp <= temp) lower = point;
-                if (point.temp >= temp && !upper) upper = point;
-            }
-            if (!lower) return table[0].value;
-            if (!upper) return table[table.length - 1].value;
-            if (lower.temp === upper.temp) return lower.value;
-            const ratio = (temp - lower.temp) / (upper.temp - lower.temp);
-            return lower.value + ratio * (upper.value - lower.value);
-        }
-
-        function calculate() {
-            const flowRateOp = parseFloat(document.getElementById('flowRate').value);
-            const temp = parseFloat(document.getElementById('temp').value);
-            const staticHead = parseFloat(document.getElementById('staticHead').value);
-            const npshStatic = parseFloat(document.getElementById('npshStatic').value);
-            const pumpEfficiency = parseFloat(document.getElementById('pumpEfficiency').value) / 100;
-            const sg = parseFloat(document.getElementById('sg').value);
-            const pipeLength = parseFloat(document.getElementById('pipeLength').value);
-            const pipeDiameterMM = document.getElementById('pipeDiameter').value;
-            const pipeDiameter = parseFloat(pipeDiameterMM) / 1000;
-            const bends90 = parseInt(document.getElementById('bends90').value);
-            const butterflyValves = parseInt(document.getElementById('butterflyValves').value);
-            const pumpModel = document.getElementById('pumpModel').value;
-            const pumpRpm = document.getElementById('pumpRpm').value;
-            const selectedPump = PUMP_DATA[pumpModel][pumpRpm];
-
-            const viscosity = getValueFromTable(VISCOSITY, temp);
-            const vapourPressureKpa = getValueFromTable(VAPOUR_PRESSURE, temp);
-            const hvap = vapourPressureKpa / (9.81 * (sg * 1000) / 1000);
-            const pipeArea = Math.PI * Math.pow(pipeDiameter / 2, 2);
-            const kFactor90 = K_VALUES['90o bend'][pipeDiameterMM] || 0.5;
-            const kFactorButterfly = K_VALUES['Butterfly'][pipeDiameterMM] || 0.5;
-            const totalK = (bends90 * kFactor90) + (butterflyValves * kFactorButterfly);
-
-            const flowRates = selectedPump.flow;
-            const systemHeadData = [];
-            const npshaData = [];
-
-            flowRates.forEach(q_m3h => {
-                const q_m3s = q_m3h / 3600;
-                const velocity = q_m3s / pipeArea;
-                const reynolds = (velocity * pipeDiameter) / viscosity;
-                const frictionFactor = (reynolds > 4000) ? 0.02 : (reynolds > 0 ? 64 / reynolds : 0);
-                const hf_pipe = frictionFactor * (pipeLength / pipeDiameter) * (Math.pow(velocity, 2) / (2 * 9.81));
-                const hf_fittings = totalK * (Math.pow(velocity, 2) / (2 * 9.81));
-                const totalDynamicHead = hf_pipe + hf_fittings;
-                const totalHead = staticHead + totalDynamicHead;
-                systemHeadData.push(totalHead);
-
-                const npsha = 10.33 + npshStatic - hvap - totalDynamicHead;
-                npshaData.push(npsha);
-            });
-            
-            const q_op_m3s = flowRateOp / 3600;
-            const vel_op = q_op_m3s / pipeArea;
-            const reynolds_op = (vel_op * pipeDiameter) / viscosity;
-            const frictionFactor_op = (reynolds_op > 4000) ? 0.02 : (reynolds_op > 0 ? 64 / reynolds_op : 0);
-            const hf_pipe_op = frictionFactor_op * (pipeLength / pipeDiameter) * (Math.pow(vel_op, 2) / (2 * 9.81));
-            const hf_fittings_op = totalK * (Math.pow(vel_op, 2) / (2 * 9.81));
-            const operatingDynamicHead = hf_pipe_op + hf_fittings_op;
-            const operatingHead = staticHead + operatingDynamicHead;
-            const operatingNPSHa = 10.33 + npshStatic - hvap - operatingDynamicHead;
-            const powerKw = pumpEfficiency > 0 ? (q_op_m3s * operatingHead * (sg * 1000) * 9.81) / (pumpEfficiency * 1000) : 0;
-
-            document.getElementById('totalHeadResult').textContent = `${operatingHead.toFixed(1)} m`;
-            document.getElementById('npshResult').textContent = `${operatingNPSHa.toFixed(1)} m`;
-            document.getElementById('powerResult').textContent = `${powerKw.toFixed(1)} kW`;
-
-            drawChart(flowRates, systemHeadData, selectedPump.head, npshaData, selectedPump.npshr);
-        }
-
-        function drawChart(flow, systemHead, pumpHead, npsha, npshr) {
-            const ctx = document.getElementById('mainChart').getContext('2d');
-            if (mainChart) {
-                mainChart.destroy();
-            }
-            mainChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: flow,
-                    datasets: [{
-                        label: 'System Curve (m)',
-                        data: systemHead,
-                        borderColor: '#3b82f6',
-                        fill: false,
-                        tension: 0.1
-                    }, {
-                        label: 'Pump Curve (m)',
-                        data: pumpHead,
-                        borderColor: '#1e293b',
-                        fill: false,
-                        tension: 0.1
-                    }, {
-                        label: 'NPSHa (m)',
-                        data: npsha,
-                        borderColor: '#16a34a',
-                        fill: false,
-                        tension: 0.1
-                    }, {
-                        label: 'NPSHr (m)',
-                        data: npshr,
-                        borderColor: '#dc2626',
-                        borderDash: [5, 5],
-                        fill: false,
-                        tension: 0.1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { title: { display: true, text: 'Flow Rate (m³/h)' } },
-                        y: { title: { display: true, text: 'Head (m)' }, beginAtZero: true }
-                    },
-                    plugins: {
-                        title: { display: true, text: 'System Performance Analysis Graph', font: { size: 16 } },
-                        tooltip: { mode: 'index', intersect: false }
-                    },
-                    interaction: { mode: 'index', intersect: false }
-                }
-            });
-        }
-
-        // This listener ensures that the HTML is fully loaded before the script tries to find buttons.
-        // This is the key to preventing "button not working" errors.
-        document.addEventListener('DOMContentLoaded', () => {
-            
-            // --- TAB BUTTONS FUNCTIONALITY ---
-            const tabButtons = document.querySelectorAll('.tab-button');
-            const tabContents = document.querySelectorAll('.tab-content');
-
-            tabButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    tabButtons.forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
-
-                    const tabId = button.getAttribute('data-tab');
-                    tabContents.forEach(content => {
-                        content.classList.remove('active');
-                        if (content.id === tabId) {
-                            content.classList.add('active');
-                        }
-                    });
+                const target = tab.getAttribute('data-tab');
+                calculators.forEach(calc => {
+                    if (calc.id === target) {
+                        calc.classList.add('active');
+                    } else {
+                        calc.classList.remove('active');
+                    }
                 });
             });
+        });
 
-            // --- RECALCULATE BUTTON FUNCTIONALITY ---
-            document.getElementById('calculateBtn').addEventListener('click', calculate);
-            
-            // --- INITIAL CALCULATION ON PAGE LOAD ---
-            calculate();
+        // Pump KW Calculator Logic
+        document.getElementById('calculateKWBtn').addEventListener('click', () => {
+            try {
+                const density = parseFloat(document.getElementById('density').value);
+                const flowRateM3H = parseFloat(document.getElementById('flowRateKW').value);
+                const totalHeadM = parseFloat(document.getElementById('totalHead').value);
+                const efficiencyPercent = parseFloat(document.getElementById('pumpEfficiency').value);
+
+                if (isNaN(density) || isNaN(flowRateM3H) || isNaN(totalHeadM) || isNaN(efficiencyPercent)) {
+                    alert('Please enter valid numbers in all fields.');
+                    return;
+                }
+                if (efficiencyPercent <= 0) {
+                    alert('Pump Efficiency must be greater than zero.');
+                    return;
+                }
+
+                const gravity = 9.81;
+                const flowRateM3S = flowRateM3H / 3600;
+                const efficiencyDecimal = efficiencyPercent / 100;
+
+                const powerKW = (density * gravity * flowRateM3S * totalHeadM) / (1000 * efficiencyDecimal);
+
+                document.getElementById('powerResult').textContent = `${powerKW.toFixed(2)} kW`;
+                document.getElementById('resultKW').style.display = 'block';
+
+            } catch (error) {
+                alert(`An error occurred: ${error.message}`);
+            }
+        });
+
+        // Pipe Sizing Calculator Logic
+        document.getElementById('calculatePipeBtn').addEventListener('click', () => {
+            try {
+                const flowRateM3H = parseFloat(document.getElementById('flowRatePipe').value);
+                const velocity = parseFloat(document.getElementById('velocity').value);
+
+                if (isNaN(flowRateM3H) || isNaN(velocity)) {
+                    alert('Please enter valid numbers in all fields.');
+                    return;
+                }
+                if (velocity <= 0) {
+                    alert('Velocity must be greater than zero.');
+                    return;
+                }
+
+                const flowRateM3S = flowRateM3H / 3600;
+                
+                // Formula: Area = Q / v
+                const area = flowRateM3S / velocity;
+                
+                // Formula: D = sqrt(4 * Area / PI)
+                const diameterM = Math.sqrt((4 * area) / Math.PI);
+                const diameterMM = diameterM * 1000;
+                const diameterInches = diameterMM / 25.4; // Conversion to inches
+
+                document.getElementById('diameterResultMM').textContent = `${diameterMM.toFixed(1)}`;
+                document.getElementById('diameterResultInches').textContent = `${diameterInches.toFixed(2)}`;
+                document.getElementById('resultPipe').style.display = 'block';
+
+            } catch (error) {
+                alert(`An error occurred: ${error.message}`);
+            }
         });
     </script>
 
